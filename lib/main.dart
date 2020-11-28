@@ -42,7 +42,6 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
           color: Colors.black,
           child: Row(
             children: <Widget>[
-              tts.languages != null ? tts.languageDropDownSection() : Container(),
               FloatingActionButton(onPressed: () async => await tts.speak('upward')),
 
             ],

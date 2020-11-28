@@ -28,18 +28,17 @@ class TxtToSpeech {
 
   get isContinued => ttsState == TtsState.continued;
 
-  TxtToSpeech();
+  TxtToSpeech() {
+    initTts();
+  }
 
-  initTts() async {
-    this.flutterTts = FlutterTts();
+  initTts() {
+    flutterTts = FlutterTts();
 
-    _getLanguages();
+    //_getLanguages();
+    setLang();
 
-    if (!kIsWeb) {
-      if (Platform.isAndroid) {
-        _getEngines();
-      }
-    }
+    _getEngines();
 
     flutterTts.setStartHandler(() {
       print("Playing");
@@ -74,9 +73,12 @@ class TxtToSpeech {
     });
   }
 
-  Future _getLanguages() {
-    if (languages != null){ 
+  setLang() async {
+    await flutterTts.setLanguage("en-US");
+  }
 
+  Future _getLanguages() async {
+    if (languages != null) {
       languages = flutterTts.getLanguages;
     }
   }
@@ -98,19 +100,23 @@ class TxtToSpeech {
     if (_newVoiceText != null) {
       if (_newVoiceText.isNotEmpty) {
         await flutterTts.awaitSpeakCompletion(true);
-        await flutterTts.speak(s);
+        await flutterTts.speak(s.toString());
       }
     }
   }
 
   Future _stop() async {
     var result = await flutterTts.stop();
-    if (result == 1) ttsState = TtsState.stopped;
+    if (result == 1) {
+      ttsState = TtsState.stopped;
+    }
   }
 
   Future _pause() async {
     var result = await flutterTts.pause();
-    if (result == 1) ttsState = TtsState.paused;
+    if (result == 1) {
+      ttsState = TtsState.paused;
+    }
   }
 
   @override
