@@ -105,8 +105,6 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
     if (_isDetecting) return;
     _isDetecting = true;
     Future findObjectFuture = _findObject(image);
-    // FIXME: Retrieving the results from the findObject future yields an error with the default image detection model nothing is returned from the SBB model.
-    // FIXME: Continued form previous line caused by illegal argument exception tensor dimensions
     List results = await Future.wait(
         [findObjectFuture, Future.delayed(Duration(milliseconds: 700))]);
     // Detecting object is done here.
@@ -150,11 +148,11 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
 
   Future<Map> _findObject(CameraImage image) async {
     // This function is entered but there is no rectangle displayed.
-    List resultList = await Tflite.detectObjectOnFrame(
+    List resultList = await Tflite.runModelOnFrame(
       bytesList: image.planes.map((plane) {
         return plane.bytes;
       }).toList(),
-      model: "SBB_MODEL",
+      // model: "SBB_MODEL",
       // TODO: Check whether necessary to resize image like in the SBB example in python.
       imageHeight: image.height,
       imageWidth: image.width,
