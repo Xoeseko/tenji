@@ -1,4 +1,4 @@
-package ch.unige.tenji
+package ch.unige.cui.lauzhack.tenji
 
 import io.flutter.embedding.android.FlutterActivity
 
