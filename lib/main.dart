@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:camera/camera.dart';
-import 'package:image/image.dart' as imageLib;
 import 'package:tenji/TxtToSpeech.dart';
-import 'package:tflite/tflite.dart';
-
-import 'RectPainter.dart';
 
 void main() => runApp(TenjiApp());
+
+enum Direction_EN { up, down, right, left }
 
 class TenjiApp extends StatelessWidget {
   @override
@@ -26,7 +22,7 @@ class TenjiHomePage extends StatefulWidget {
 }
 
 class _TenjiHomePageState extends State<TenjiHomePage> {
-  TxtToSpeech tts; 
+  TxtToSpeech tts;
 
   @override
   void initState() {
@@ -39,11 +35,46 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
     return Scaffold(
       appBar: AppBar(),
       body: Container(
-          color: Colors.black,
-          child: Row(
-            children: <Widget>[
-              FloatingActionButton(onPressed: () async => await tts.speak('upward')),
 
+          color: Colors.white,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Flexible(
+                child: FloatingActionButton(
+                    child: Icon(Icons.arrow_circle_up),
+                    onPressed: () async => await tts.speak(Direction_EN.up)),
+                flex: 2,
+                fit: FlexFit.tight,
+              ),
+              Flexible(
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      FloatingActionButton(
+                          child: Icon(Icons.arrow_right_rounded),
+                          onPressed: () async =>
+                              await tts.speak(Direction_EN.right)),
+                      FloatingActionButton(
+                          child: Icon(Icons.arrow_left_rounded),
+                          onPressed: () async =>
+                              await tts.speak(Direction_EN.left))
+                    ],
+                  ),
+                ),
+                flex: 2,
+                fit: FlexFit.tight,
+              ),
+              Flexible(
+                child: FloatingActionButton(
+                    child: Icon(Icons.arrow_left_rounded),
+                    onPressed: () async => await tts.speak(Direction_EN.down)),
+                flex: 2,
+                fit: FlexFit.tight,
+              ),
             ],
           )),
     );
