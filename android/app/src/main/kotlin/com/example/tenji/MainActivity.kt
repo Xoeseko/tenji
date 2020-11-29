@@ -1,4 +1,4 @@
-package com.example.tenji
+package ch.unige.tenji
 
 import io.flutter.embedding.android.FlutterActivity
 
