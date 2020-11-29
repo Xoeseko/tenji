@@ -48,6 +48,7 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
     super.initState();
     tts = new TxtToSpeech();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    _initializeCamera();
   }
 
   void _initializeCamera() async {
