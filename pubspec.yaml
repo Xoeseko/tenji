@@ -24,8 +24,9 @@ dependencies:
   flutter:
     sdk: flutter
   camera: ^0.5.8+11
-  tflite: ^1.1.1
+  # tflite: ^1.1.1
   image: ^2.1.19
+  http: ^0.12.2
 
 
 
