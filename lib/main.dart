@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tenji/TxtToSpeech.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imageLib;
@@ -9,6 +10,8 @@ import 'package:http_parser/http_parser.dart';
 import 'RectPainter.dart';
 
 void main() => runApp(TenjiApp());
+
+enum Direction_EN { up, down, right, left }
 
 class TenjiApp extends StatelessWidget {
   @override
@@ -27,6 +30,7 @@ class TenjiHomePage extends StatefulWidget {
 }
 
 class _TenjiHomePageState extends State<TenjiHomePage> {
+  TxtToSpeech tts;
   CameraController _controller;
   bool _cameraInitialized = false;
   String _topText = '';
@@ -42,7 +46,7 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    tts = new TxtToSpeech();
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     _initializeCamera();
   }
@@ -75,7 +79,6 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
     super.dispose();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -106,6 +109,7 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
       //   onPressed: print("not yet implemented"),
       //   backgroundColor: Colors.white,
       // ),
+      
     );
   }
 
