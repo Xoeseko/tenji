@@ -1,3 +1,6 @@
+import 'dart:convert';
+// import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:tenji/TxtToSpeech.dart';
 import 'package:flutter/services.dart';
@@ -5,9 +8,10 @@ import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imageLib;
 // import 'package:tflite/tflite.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 
 import 'RectPainter.dart';
+
+enum labels { door, openDoor, doorHandle, doorButton }
 
 void main() => runApp(TenjiApp());
 
@@ -81,35 +85,40 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-          color: Colors.black,
-          child: Column(
-            children: <Widget>[
-              Text(
-                _topText,
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-              _cameraInitialized
-                  ? Expanded(
-                      child: OverflowBox(
-                          maxWidth: double.infinity,
-                          child: AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
-                            child: Stack(
-                                fit: StackFit.expand,
-                                children: <Widget>[
-                                  CameraPreview(_controller),
-                                  CustomPaint(painter: RectPainter(_savedRect))
-                                ]),
-                          )))
-                  : Container(),
-            ],
-          )),
+      body: GestureDetector(
+          onTap: () {
+            tts.repeat();
+          },
+          child: AbsorbPointer(
+              child: Container(
+                  color: Colors.black,
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        _topText,
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                      _cameraInitialized
+                          ? Expanded(
+                              child: OverflowBox(
+                                  maxWidth: double.infinity,
+                                  child: AspectRatio(
+                                    aspectRatio: _controller.value.aspectRatio,
+                                    child: Stack(
+                                        fit: StackFit.expand,
+                                        children: <Widget>[
+                                          CameraPreview(_controller),
+                                          CustomPaint(
+                                              painter: RectPainter(_savedRect)),
+                                        ]),
+                                  )))
+                          : Container(),
+                    ],
+                  )))),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: print("not yet implemented"),
       //   backgroundColor: Colors.white,
       // ),
-      
     );
   }
 
@@ -122,6 +131,7 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
       Future.delayed(Duration(milliseconds: 700)),
     ]);
     // Detecting object is done here.
+    tts.speak(_directionFinder(results[0], image.width, image.height));
     setState(() {
       _savedRect = results[0];
     });
@@ -131,7 +141,7 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
   static imageLib.Image _convertCameraImage(CameraImage image) {
     int width = image.width;
     int height = image.height;
-    // imglib -> Image package from https://pub.dartlang.org/packages/image
+    // imageLib -> Image package from https://pub.dartlang.org/packages/image
     var img = imageLib.Image(width, height); // Create Image buffer
     const int hexFF = 0xFF000000;
     final int uvyButtonStride = image.planes[1].bytesPerRow;
@@ -161,53 +171,67 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
   }
 
   Future<Map> _findObject(CameraImage image) async {
-    var request = new http.MultipartRequest("POST", _url)
-      ..files.add(http.MultipartFile.fromBytes(
-          'cameraFeedSingleFrame', _convertCameraImage(image).getBytes(),
-          contentType: MediaType.parse('multipart/form-data')));
+    var img = imageLib.encodeJpg(_convertCameraImage(image));
 
-    // request.headers.update('Content-Type', (value) => 'multipart/form-data');
+    var response = _client.post(_url, body: img);
+    var res = jsonDecode((await response).body);
+    print(res);
+    var resultList = res["predictions"] as List;
 
-    // This function is entered but there is no rectangle displayed.
-    var response = await _client.send(request);
-    print((await http.Response.fromStream(response)).body);
-    // Tflite.runModelOnFrame(
-    //   bytesList: image.planes.map((plane) {
-    //     return plane.bytes;
-    //   }).toList(),
-    // numResults: 4,
-    // model: "SBB_MOBILE",
-    // TODO: Check whether necessary to resize image like in the SBB example in python.
-    // imageHeight: image.height,
-    // imageWidth: image.width,
-    // imageMean: 127.5,
-    // imageStd: 127.5,
-    // threshold: 0.2,
-    // TODO: Check other parameters necessary
-    // );
-
-    // List<String> possibleDog = ['dog', 'cat', 'bear', 'teddy bear', 'sheep'];
-    List<String> possibleLabels = [
-      'Door',
-      'Open door',
-      'Door handle',
-      'Door button'
-    ];
+    // List<String> possibleLabels = [
+    //   'Door',
+    //   'Open door',
+    //   'Door handle',
+    //   'Door button'
+    // ];
 
     // TODO:  FIND AN ALTERNATIVE TO RETURNING THE BIGGEST MATCH SHOULD RETURN DOOR OR BUTTON
-    // Map biggestRect;
+    Map biggestRect;
     // double rectSize, rectMax = 0.0;
     // for (int i = 0; i < resultList.length; i++) {
-    //   if (possibleLabels.contains(resultList[i]["detectedClass"])) {
-    //     // if (possibleLabels.contains(resultList[i]["label"])) {
-    //     Map aRect = resultList[i]["rect"];
-    //     rectSize = aRect["w"] * aRect["h"];
-    //     if (rectSize > rectMax) {
-    //       rectMax = rectSize;
-    //       biggestRect = aRect;
-    //     }
-    //   }
+    // if (possibleLabels.contains(resultList[i]["detectedClass"])) {
+    // if (possibleLabels.contains(resultList[i]["label"])) {
+
+    // Map aRect = resultList[i]["rect"];
+    // rectSize = aRect["w"] * aRect["h"];
+    // if (rectSize > rectMax) {
+    //   rectMax = rectSize;
+    //   biggestRect = aRect;
+    // }
+    // }
+    // if (biggestRect == null) {}
     // }
     // return biggestRect;
+
+    if (resultList.isNotEmpty) {
+      biggestRect = resultList[0]["boundingBox"];
+    }
+
+    return biggestRect;
+  }
+
+  Direction_EN _directionFinder(Map rect, int width, int height) {
+    // double width = MediaQuery.of(context).size.width;
+    // double height = MediaQuery.of(context).size.height;
+
+    double x, y, w, h, screenCenterX, screenCenterY, rectCenterX, rectCenterY;
+    x = rect["left"] * width;
+    y = rect["top"] * height;
+    w = rect["width"] * width;
+    h = rect["height"] * height;
+    screenCenterX = width / 2;
+    screenCenterY = height / 2;
+    rectCenterX = x + w / 2;
+    rectCenterY = y + h / 2;
+
+    // TODO: Add Error Margin
+    // Check first horizontal
+    if (rectCenterX > screenCenterX) {
+      return Direction_EN.right;
+    } else if (rectCenterX < screenCenterX) {
+      return Direction_EN.left;
+    }
+
+    //Then only check vertical
   }
 }

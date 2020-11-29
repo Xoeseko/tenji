@@ -92,6 +92,10 @@ class TxtToSpeech {
     }
   }
 
+  Future repeat() async {
+    await flutterTts.speak(this.directionPrev);
+  }
+
   Future speak(Direction_EN dir) async {
     var directionTxt =
         dir.toString().substring(dir.toString().indexOf('.') + 1);

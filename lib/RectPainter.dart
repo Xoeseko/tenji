@@ -11,10 +11,10 @@ class RectPainter extends CustomPainter {
       paint.style = PaintingStyle.stroke;
       paint.strokeWidth = 2.0;
       double x, y, w, h;
-      x = rect["x"] * size.width;
-      y = rect["y"] * size.height;
-      w = rect["w"] * size.width;
-      h = rect["h"] * size.height;
+      x = rect["left"] * size.width;
+      y = rect["top"] * size.height;
+      w = rect["width"] * size.width;
+      h = rect["height"] * size.height;
       Rect rect1 = Offset(x, y) & Size(w, h);
       canvas.drawRect(rect1, paint);
     }
