@@ -131,10 +131,12 @@ class _TenjiHomePageState extends State<TenjiHomePage> {
       Future.delayed(Duration(milliseconds: 700)),
     ]);
     // Detecting object is done here.
-    tts.speak(_directionFinder(results[0], image.width, image.height));
-    setState(() {
-      _savedRect = results[0];
-    });
+    if (results[0] != null) {
+      await tts.speak(_directionFinder(results[0], image.width, image.height));
+      setState(() {
+        _savedRect = results[0];
+      });
+    }
     _isDetecting = false;
   }
 
